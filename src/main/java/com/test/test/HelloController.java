@@ -1,8 +1,12 @@
 package com.test.test;
 
+import com.test.test.calculations.FuncDerivativeSurface;
+import com.test.test.calculations.FuncSurface;
 import com.test.test.calculations.RungeKuttaSolver;
+import com.test.test.calculations.SurfaceRenderer;
 import com.test.test.calculations.impl.FunctionProvider;
 import com.test.test.calculations.impl.RungeKuttaSolverImpl;
+import com.test.test.calculations.impl.SurfaceRendererImpl;
 import com.test.test.config.ChartConfig;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -11,7 +15,9 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HelloController {
     @FXML
@@ -22,6 +28,8 @@ public class HelloController {
     private NumberAxis yAxis;
 
     private ChartConfig chartConfig;
+    private final RungeKuttaSolver rungeKuttaSolver = new RungeKuttaSolverImpl();
+    private final SurfaceRenderer surfaceRenderer = new SurfaceRendererImpl();
 
     @FXML
     public void initialize() {
@@ -35,18 +43,22 @@ public class HelloController {
     }
 
     private void plotGraph() {
-        RungeKuttaSolver solver = new RungeKuttaSolverImpl();
 
-        List<Point2D> points = solver.plotGraph(
+        Map<FuncSurface, FuncDerivativeSurface> surfaces = new HashMap<>();
+        surfaces.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1,
+                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_1);
+
+        List<Point2D> points = rungeKuttaSolver.plotGraph(
                 FunctionProvider.DEFAULT_F,
                 FunctionProvider.DEFAULT_G,
-                FunctionProvider.DEFAULT_SURFACE_FUNCTION,
-                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE,
+                surfaces,
                 Params.X_BEGIN, Params.Y_BEGIN, Params.Z_BEGIN,
                 Params.X_END, Params.STEP, Params.TOLERANCE,
-                Params.MIN_STEP, Params.MAX_STEP,
-                Params.P, Params.E, Params.Y, Params.U, Params.U);
+                Params.MIN_STEP, Params.MAX_STEP);
 
+        List<Point2D> surfacePoints = surfaceRenderer.render(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1, Params.MIN_X, Params.X_END, Params.STEP);
+
+        points.addAll(surfacePoints);
 
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
         lineChart.setLegendVisible(false);

@@ -1,32 +1,32 @@
 package com.test.test.calculations.impl;
 
+import com.test.test.Params;
 import com.test.test.calculations.*;
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RungeKuttaSolverImpl implements RungeKuttaSolver {
 
     @Override
     public List<Point2D> plotGraph(FuncF f, FuncG g,
-                                   FuncSurface surface,
-                                   FuncDerivativeSurface derivativeSurface,
+                                   Map<FuncSurface, FuncDerivativeSurface> surfacesMap,
                                    double xBegin, double yBegin, double zBegin,
                                    double xEnd,
                                    double step, double tolerance,
-                                   double minStep, double maxStep,
-                                   double R, double E, double Y, double U, double M) {
+                                   double minStep, double maxStep) {
 
         System.out.println("start runge-kutta");
 
         List<Point2D> points = new ArrayList<>();
 
+        double currentStep = step;
+        double nextY, nextZ;
+
         while (xBegin <= xEnd) {
             points.add(new Point2D(xBegin, yBegin));
-
-            double currentStep = step;
-            double nextY, nextZ;
 
             while (true) {
                 double k1_y = currentStep * f.compute(zBegin);
@@ -57,18 +57,20 @@ public class RungeKuttaSolverImpl implements RungeKuttaSolver {
                 }
             }
 
-            double surfaceValue = surface.compute(xBegin, E, Y, U, M);
-            double df_dtau = derivativeSurface.compute(xBegin, E, Y, U);
+            for (Map.Entry<FuncSurface, FuncDerivativeSurface> entry : surfacesMap.entrySet()) {
+                double surfaceValue = entry.getKey().compute(xBegin);
+                double df_dtau = entry.getValue().compute(xBegin);
 
-            if (nextY <= surfaceValue && nextZ - df_dtau < 0) {
-                double t = (surfaceValue - yBegin) / (nextY - yBegin);
-                double xImpact = xBegin + t * currentStep;
-                double zImpact = zBegin + t * (nextZ - zBegin);
+                if (nextY <= surfaceValue && nextZ - df_dtau < 0) {
+                    double t = (surfaceValue - yBegin) / (nextY - yBegin);
+                    double xImpact = xBegin + t * currentStep;
+                    double zImpact = zBegin + t * (nextZ - zBegin);
 
-                nextY = surfaceValue;
-                nextZ = -R * zImpact + (1 + R) * df_dtau;
+                    nextY = surfaceValue;
+                    nextZ = -Params.R * zImpact + (1 + Params.R) * df_dtau;
 
-                points.add(new Point2D(xImpact, surfaceValue));
+                    points.add(new Point2D(xImpact, surfaceValue));
+                }
             }
 
             xBegin += currentStep;
