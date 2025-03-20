@@ -19,11 +19,11 @@ public class ChartConfig {
     public void applyAxisConfig(NumberAxis xAxis, NumberAxis yAxis) {
         xAxis.setAutoRanging(false);
         xAxis.setLowerBound(minX);
-        xAxis.setUpperBound(Math.floor(maxX + 1));
+        xAxis.setUpperBound(Math.floor(maxX));
 
         yAxis.setAutoRanging(false);
         yAxis.setLowerBound(Math.ceil(minY - 1));
-        yAxis.setUpperBound(Math.floor(maxY + 1));
+        yAxis.setUpperBound(Math.floor(maxY - 1));
     }
 
     public void applySeriesConfig(XYChart.Series<Number, Number> series) {

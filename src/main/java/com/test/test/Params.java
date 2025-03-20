@@ -9,8 +9,12 @@ public class Params {
     public static final double M = 0.1;
 
     public static final double Y1 = 4;
-    public static final double U1 = 0.3;
+    public static final double U1 = Math.PI;
     public static final double E1 = 0.02;
+
+    public static final double Y2 = 3;
+    public static final double U2 = Math.PI * 2;
+    public static final double E2 = 0.018;
 
     public static final double STEP = 0.001;
     public static final double MIN_X = 0;

@@ -18,4 +18,10 @@ public class FunctionProvider {
     public static final FuncDerivativeSurface DEFAULT_DERIVATIVE_SURFACE_1 =
             (x) -> Params.M * Params.Y1 * Math.sin(x - Params.U1);
 
+    public static final FuncSurface DEFAULT_SURFACE_FUNCTION_2 =
+            (x) -> Params.E2 - Params.M * Params.Y2 * Math.cos(x - Params.U2);
+
+    public static final FuncDerivativeSurface DEFAULT_DERIVATIVE_SURFACE_2 =
+            (x) -> Params.M * Params.Y2 * Math.sin(x - Params.U2);
+
 }

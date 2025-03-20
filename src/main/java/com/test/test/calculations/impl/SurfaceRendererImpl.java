@@ -9,10 +9,15 @@ import java.util.List;
 
 public class SurfaceRendererImpl implements SurfaceRenderer {
     @Override
-    public List<Point2D> render(FuncSurface surface, double xBegin, double xEnd, double step) {
+    public List<Point2D> render(List<FuncSurface> surfaces, double xBegin, double xEnd, double step) {
         List<Point2D> surfacePoints = new ArrayList<>();
         for (double x = xBegin; x <= xEnd; x += step) {
-            double y = surface.compute(x);
+            double y = -Double.MAX_VALUE;
+            for (FuncSurface surface : surfaces) {
+                double yVal = surface.compute(x);
+                if (yVal > y) y = yVal;
+            }
+
             surfacePoints.add(new Point2D(x, y));
         }
 

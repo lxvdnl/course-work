@@ -15,6 +15,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,19 +45,24 @@ public class HelloController {
 
     private void plotGraph() {
 
-        Map<FuncSurface, FuncDerivativeSurface> surfaces = new HashMap<>();
-        surfaces.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1,
+        Map<FuncSurface, FuncDerivativeSurface> surfacesMap = new HashMap<>();
+        surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1,
                 FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_1);
+        surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_2,
+                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_2);
 
         List<Point2D> points = rungeKuttaSolver.plotGraph(
                 FunctionProvider.DEFAULT_F,
                 FunctionProvider.DEFAULT_G,
-                surfaces,
+                surfacesMap,
                 Params.X_BEGIN, Params.Y_BEGIN, Params.Z_BEGIN,
                 Params.X_END, Params.STEP, Params.TOLERANCE,
                 Params.MIN_STEP, Params.MAX_STEP);
 
-        List<Point2D> surfacePoints = surfaceRenderer.render(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1, Params.MIN_X, Params.X_END, Params.STEP);
+        List<FuncSurface> surfaces = new ArrayList<>();
+        surfaces.add(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1);
+        surfaces.add(FunctionProvider.DEFAULT_SURFACE_FUNCTION_2);
+        List<Point2D> surfacePoints = surfaceRenderer.render(surfaces, Params.MIN_X, Params.X_END, Params.STEP);
 
         points.addAll(surfacePoints);
 
