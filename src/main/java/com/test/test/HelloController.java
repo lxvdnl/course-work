@@ -14,6 +14,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 public class HelloController {
+    public TextField textFieldR;
+    public Slider sliderR;
+    public TextField textFieldP;
+    public Slider sliderP;
+    public TextField textFieldN;
+    public Slider sliderN;
     @FXML
     private LineChart<Number, Number> lineChart;
     @FXML

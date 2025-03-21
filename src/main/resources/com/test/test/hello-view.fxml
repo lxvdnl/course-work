@@ -1,19 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.LineChart?>
-<?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="600.0" prefWidth="1100.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.HelloController">
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="1100.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.HelloController">
 
     <LineChart fx:id="lineChart" legendSide="TOP" prefHeight="600.0" prefWidth="1000.0" title="Graph">
         <xAxis>
             <NumberAxis autoRanging="false" label="τ" tickUnit="1.0" upperBound="10.0" fx:id="xAxis" />
-
         </xAxis>
         <yAxis>
             <NumberAxis fx:id="yAxis" autoRanging="false" label="X" lowerBound="-4.0" tickUnit="1.0" upperBound="5.0" />
         </yAxis>
     </LineChart>
+
+    <VBox spacing="10">
+        <GridPane alignment="CENTER" hgap="10" vgap="10">
+            <Label text="N {1, 2, 3}:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Slider fx:id="sliderN" blockIncrement="1" majorTickUnit="1" max="3" min="1" minorTickCount="0" snapToTicks="true" prefWidth="600" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <TextField fx:id="textFieldN" prefWidth="50" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+
+            <Label text="P (0.05 - 2):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Slider fx:id="sliderP" blockIncrement="0.05" majorTickUnit="0.5" max="2" min="0.5" minorTickCount="4" snapToTicks="true" prefWidth="600" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <TextField fx:id="textFieldP" prefWidth="50" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+
+            <Label text="R (0.05 - 0.95):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Slider fx:id="sliderR" blockIncrement="0.05" majorTickUnit="0.2" max="0.95" min="0.05" snapToTicks="true" prefWidth="600" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField fx:id="textFieldR" prefWidth="50" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+        </GridPane>
+
+        <VBox.margin>
+            <Insets bottom="10.0"/>
+        </VBox.margin>
+    </VBox>
 
 </VBox>
