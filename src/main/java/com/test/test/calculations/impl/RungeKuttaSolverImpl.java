@@ -18,8 +18,6 @@ public class RungeKuttaSolverImpl implements RungeKuttaSolver {
                                    double step, double tolerance,
                                    double minStep, double maxStep) {
 
-        System.out.println("start runge-kutta");
-
         List<Point2D> points = new ArrayList<>();
 
         double currentStep = step;
@@ -81,8 +79,6 @@ public class RungeKuttaSolverImpl implements RungeKuttaSolver {
                 currentStep *= 2.0;
             }
         }
-
-        System.out.println("end runge-kutta");
         return points;
     }
 }

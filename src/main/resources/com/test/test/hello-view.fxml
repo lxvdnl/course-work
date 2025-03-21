@@ -2,7 +2,6 @@
 
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox alignment="CENTER" prefHeight="600.0" prefWidth="1100.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.HelloController">
@@ -16,6 +15,5 @@
             <NumberAxis fx:id="yAxis" autoRanging="false" label="X" lowerBound="-4.0" tickUnit="1.0" upperBound="5.0" />
         </yAxis>
     </LineChart>
-   <Accordion />
 
 </VBox>
