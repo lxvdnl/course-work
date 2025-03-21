@@ -2,7 +2,7 @@ package com.test.test;
 
 public class Params {
 
-    public static final double N = 1;
+    public static final int N = 1;
 
     public static final double P = 1.5;
     public static final double R = 0.8;

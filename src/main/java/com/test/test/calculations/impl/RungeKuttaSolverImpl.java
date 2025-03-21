@@ -5,6 +5,7 @@ import com.test.test.calculations.*;
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +13,19 @@ public class RungeKuttaSolverImpl implements RungeKuttaSolver {
 
     @Override
     public List<Point2D> plotGraph(FuncF f, FuncG g,
-                                   Map<FuncSurface, FuncDerivativeSurface> surfacesMap,
                                    double xBegin, double yBegin, double zBegin,
                                    double xEnd,
                                    double step, double tolerance,
-                                   double minStep, double maxStep) {
+                                   double minStep, double maxStep,
+                                   int N, double P, double R) {
+
+        Map<FuncSurface, FuncDerivativeSurface> surfacesMap = new HashMap<>();
+        surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1,
+                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_1);
+        if (N >= 2) surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_2,
+                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_2);
+        if (N == 3) surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_3,
+                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_3);
 
         List<Point2D> points = new ArrayList<>();
 
@@ -28,13 +37,13 @@ public class RungeKuttaSolverImpl implements RungeKuttaSolver {
 
             while (true) {
                 double k1_y = currentStep * f.compute(zBegin);
-                double k1_z = currentStep * g.compute();
+                double k1_z = currentStep * g.compute(P);
                 double k2_y = currentStep * f.compute(zBegin + k1_z / 2);
-                double k2_z = currentStep * g.compute();
+                double k2_z = currentStep * g.compute(P);
                 double k3_y = currentStep * f.compute(zBegin + k2_z / 2);
-                double k3_z = currentStep * g.compute();
+                double k3_z = currentStep * g.compute(P);
                 double k4_y = currentStep * f.compute(zBegin + k3_z);
-                double k4_z = currentStep * g.compute();
+                double k4_z = currentStep * g.compute(P);
 
                 double tempY = yBegin + (k1_y + 2 * k2_y + 2 * k3_y + k4_y) / 6;
                 double tempZ = zBegin + (k1_z + 2 * k2_z + 2 * k3_z + k4_z) / 6;
@@ -65,7 +74,7 @@ public class RungeKuttaSolverImpl implements RungeKuttaSolver {
                     double zImpact = zBegin + t * (nextZ - zBegin);
 
                     nextY = surfaceValue;
-                    nextZ = -Params.R * zImpact + (1 + Params.R) * df_dtau;
+                    nextZ = -R * zImpact + (1 + R) * df_dtau;
 
                     points.add(new Point2D(xImpact, surfaceValue));
                 }

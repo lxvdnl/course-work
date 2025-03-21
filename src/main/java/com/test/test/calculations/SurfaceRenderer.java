@@ -7,6 +7,6 @@ import java.util.List;
 @FunctionalInterface
 public interface SurfaceRenderer {
 
-    List<Point2D> render(List<FuncSurface> surfaces, double xBegin, double xEnd, double step);
+    List<Point2D> render(int N, double xBegin, double xEnd, double step);
 
 }

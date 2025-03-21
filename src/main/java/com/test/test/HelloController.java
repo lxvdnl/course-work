@@ -1,7 +1,5 @@
 package com.test.test;
 
-import com.test.test.calculations.FuncDerivativeSurface;
-import com.test.test.calculations.FuncSurface;
 import com.test.test.calculations.RungeKuttaSolver;
 import com.test.test.calculations.SurfaceRenderer;
 import com.test.test.calculations.impl.FunctionProvider;
@@ -14,25 +12,34 @@ import javafx.geometry.Point2D;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HelloController {
-    public TextField textFieldR;
-    public Slider sliderR;
-    public TextField textFieldP;
-    public Slider sliderP;
+
+    public Button drawButton;
+    int N;
+    double P, R;
+
     public TextField textFieldN;
     public Slider sliderN;
+
+    public TextField textFieldP;
+    public Slider sliderP;
+
+    public TextField textFieldR;
+    public Slider sliderR;
+
     @FXML
     private LineChart<Number, Number> lineChart;
+
     @FXML
     private NumberAxis xAxis;
+
     @FXML
     private NumberAxis yAxis;
 
@@ -40,53 +47,60 @@ public class HelloController {
     private final RungeKuttaSolver rungeKuttaSolver = new RungeKuttaSolverImpl();
     private final SurfaceRenderer surfaceRenderer = new SurfaceRendererImpl();
 
+    List<Point2D> surfacePoints;
+
     @FXML
     public void initialize() {
         chartConfig = new ChartConfig(
                 Params.MIN_X, Params.X_END, Params.MIN_Y, Params.MAX_Y
         );
-
+        lineChart.setLegendVisible(false);
         chartConfig.applyAxisConfig(xAxis, yAxis);
 
+        P = Params.P;
+        R = Params.R;
+        N = Params.N;
+
+        sliderN.setValue(N);
+        textFieldN.setText(String.valueOf(N));
+        sliderP.setValue(P);
+        textFieldP.setText(String.format("%.2f", P));
+        sliderR.setValue(Params.R);
+        textFieldR.setText(String.format("%.2f", Params.R));
+
+        sliderN.valueProperty().addListener((observable, oldValue, newValue) ->
+            textFieldN.setText(String.valueOf(newValue.intValue())));
+
+        sliderP.valueProperty().addListener((observable, oldValue, newValue) ->
+            textFieldP.setText(String.format("%.2f", newValue.doubleValue())));
+
+        sliderR.valueProperty().addListener((observable, oldValue, newValue) ->
+            textFieldR.setText(String.format("%.2f", newValue.doubleValue())));
+
+        surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
+
         Platform.runLater(this::plotGraph);
+
+        drawButton.setOnAction(event -> {
+            if (updateParams()) surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
+            plotGraph();
+        });
+
     }
 
     private void plotGraph() {
 
-        Map<FuncSurface, FuncDerivativeSurface> surfacesMap = new HashMap<>();
-        surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1,
-                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_1);
-        surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_2,
-                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_2);
-        surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_3,
-                FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_3);
-
-        System.out.println("Runge-kutta start");
-
         List<Point2D> points = rungeKuttaSolver.plotGraph(
                 FunctionProvider.DEFAULT_F,
                 FunctionProvider.DEFAULT_G,
-                surfacesMap,
                 Params.X_BEGIN, Params.Y_BEGIN, Params.Z_BEGIN,
                 Params.X_END, Params.STEP, Params.TOLERANCE,
-                Params.MIN_STEP, Params.MAX_STEP);
-
-        System.out.println("Runge-kutta ends");
-
-        List<FuncSurface> surfaces = new ArrayList<>();
-        surfaces.add(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1);
-        surfaces.add(FunctionProvider.DEFAULT_SURFACE_FUNCTION_2);
-        surfaces.add(FunctionProvider.DEFAULT_SURFACE_FUNCTION_3);
-        List<Point2D> surfacePoints = surfaceRenderer.render(surfaces, Params.MIN_X, Params.X_END, Params.STEP);
-
-        System.out.println("Surface rendered");
+                Params.MIN_STEP, Params.MAX_STEP,
+                N, P, R);
 
         points.addAll(surfacePoints);
 
-        System.out.println("Points added");
-
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        lineChart.setLegendVisible(false);
 
         double newMaxY = chartConfig.getMaxY(), newMinY = chartConfig.getMinY();
 
@@ -98,8 +112,6 @@ public class HelloController {
         }
         series.getData().addAll(dataList);
 
-        System.out.println("Points added");
-
         chartConfig.setMaxY(newMaxY);
         chartConfig.setMinY(newMinY);
 
@@ -109,8 +121,17 @@ public class HelloController {
 
         lineChart.getData().clear();
         lineChart.getData().add(series);
+    }
 
-        System.out.println("Graph plotted");
+    private boolean updateParams() {
+        P = sliderP.getValue();
+        R = sliderR.getValue();
+        int tmpN = (int) sliderN.getValue();
+        if (tmpN != N) {
+            N = tmpN;
+            return true;
+        }
+        return false;
     }
 
 }

@@ -10,7 +10,7 @@ public class FunctionProvider {
 
     public static final FuncF DEFAULT_F = z -> z;
 
-    public static final FuncG DEFAULT_G = () -> - Params.P;
+    public static final FuncG DEFAULT_G = (P) -> -P;
 
     public static final FuncSurface DEFAULT_SURFACE_FUNCTION_1 =
             (x) -> Params.E1 - Params.M * Params.Y1 * Math.cos(x - Params.U1);
