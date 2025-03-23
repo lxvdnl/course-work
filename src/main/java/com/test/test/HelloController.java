@@ -84,11 +84,14 @@ public class HelloController {
         drawButton.setOnAction(event -> {
             if (updateParams()) surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
             plotGraph();
+            System.out.println("graph must be on screen");
         });
 
     }
 
     private void plotGraph() {
+
+        System.out.println("plotGraph");
 
         List<Point2D> points = rungeKuttaSolver.plotGraph(
                 FunctionProvider.DEFAULT_F,
@@ -98,11 +101,15 @@ public class HelloController {
                 Params.MIN_STEP, Params.MAX_STEP,
                 N, P, R);
 
+        System.out.println("points drawn: " + points.size());
+
         points.addAll(surfacePoints);
 
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
 
         double newMaxY = chartConfig.getMaxY(), newMinY = chartConfig.getMinY();
+
+        System.out.println("start transfer points");
 
         List<XYChart.Data<Number, Number>> dataList = new ArrayList<>();
         for (Point2D point : points) {
@@ -110,7 +117,12 @@ public class HelloController {
             if (point.getY() < newMinY) newMinY = point.getY();
             dataList.add(new XYChart.Data<>(point.getX(), point.getY()));
         }
+
+        System.out.println("end transfer points");
+
         series.getData().addAll(dataList);
+
+        System.out.println("series drawn: " + series.getData().size());
 
         chartConfig.setMaxY(newMaxY);
         chartConfig.setMinY(newMinY);
@@ -119,8 +131,15 @@ public class HelloController {
 
         chartConfig.applySeriesConfig(series);
 
-        lineChart.getData().clear();
+
+        lineChart.setAnimated(false);
+        if (!lineChart.getData().isEmpty()) {
+            lineChart.getData().removeFirst();
+        }
         lineChart.getData().add(series);
+        lineChart.setAnimated(true);
+
+        System.out.println("graph drawn");
     }
 
     private boolean updateParams() {
