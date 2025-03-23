@@ -107,7 +107,7 @@ public class HelloController {
 
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
 
-        double newMaxY = chartConfig.getMaxY(), newMinY = chartConfig.getMinY();
+        double newMaxY = 0, newMinY = chartConfig.getMinY();
 
         System.out.println("start transfer points");
 

@@ -2,10 +2,10 @@ package com.test.test;
 
 public class Params {
 
-    public static final int N = 1;
+    public static final int N = 3;
 
     public static final double P = 1.5;
-    public static final double R = 0.8;
+    public static final double R = 0.9;
     public static final double M = 0.1;
 
     public static final double Y1 = 4;
@@ -22,7 +22,7 @@ public class Params {
 
     public static final double STEP = 0.001;
     public static final double MIN_X = 0;
-    public static final double MAX_X = 30;
+    public static final double MAX_X = 50;
     public static final double MIN_Y = 0;
     public static final double MAX_Y = 4;
     public static final double X_BEGIN = 0;

@@ -22,8 +22,8 @@ public class ChartConfig {
         xAxis.setUpperBound(Math.floor(maxX));
 
         yAxis.setAutoRanging(false);
-        yAxis.setLowerBound(Math.ceil(minY - 1));
-        yAxis.setUpperBound(Math.floor(maxY - 1));
+        yAxis.setLowerBound(Math.floor(minY));
+        yAxis.setUpperBound(Math.floor(maxY + 1));
     }
 
     public void applySeriesConfig(XYChart.Series<Number, Number> series) {
