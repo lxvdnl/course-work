@@ -1,27 +1,38 @@
-package com.test.test;
+package com.test.test.surfacegraph;
 
-import com.test.test.calculations.RungeKuttaSolver;
-import com.test.test.calculations.SurfaceRenderer;
-import com.test.test.calculations.impl.FunctionProvider;
-import com.test.test.calculations.impl.RungeKuttaSolverImpl;
-import com.test.test.calculations.impl.SurfaceRendererImpl;
+import com.test.test.HelloApplication;
+import com.test.test.config.Params;
+import com.test.test.surfacegraph.calculations.RungeKuttaSolver;
+import com.test.test.surfacegraph.calculations.SurfaceRenderer;
+import com.test.test.surfacegraph.calculations.impl.FunctionProvider;
+import com.test.test.surfacegraph.calculations.impl.RungeKuttaSolverImpl;
+import com.test.test.surfacegraph.calculations.impl.SurfaceRendererImpl;
 import com.test.test.config.ChartConfig;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HelloController {
+public class SurfaceGraphController {
 
+    @FXML
     public Button drawButton;
+
+    @FXML
+    private Button bifurcationButton;
+
     int N;
     double P, R;
 
@@ -87,6 +98,7 @@ public class HelloController {
             System.out.println("graph must be on screen");
         });
 
+        bifurcationButton.setOnAction(event -> openBifurcationWindow());
     }
 
     private void plotGraph() {
@@ -131,7 +143,6 @@ public class HelloController {
 
         chartConfig.applySeriesConfig(series);
 
-
         lineChart.setAnimated(false);
         if (!lineChart.getData().isEmpty()) {
             lineChart.getData().removeFirst();
@@ -151,6 +162,18 @@ public class HelloController {
             return true;
         }
         return false;
+    }
+
+    private void openBifurcationWindow() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("bifurcation-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 1100, 600);
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="1100.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.bifurcationgraph.BifurcationController">
+    <LineChart fx:id="lineChart" legendSide="TOP" prefHeight="600.0" prefWidth="1000.0" title="Graph">
+        <xAxis>
+            <NumberAxis autoRanging="false" label="τ" tickUnit="1.0" upperBound="10.0" fx:id="xAxis" />
+        </xAxis>
+        <yAxis>
+            <NumberAxis fx:id="yAxis" autoRanging="false" label="X" lowerBound="-4.0" tickUnit="1.0" upperBound="5.0" />
+        </yAxis>
+    </LineChart>
+</VBox>

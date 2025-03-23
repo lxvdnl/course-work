@@ -1,7 +1,7 @@
-package com.test.test.calculations.impl;
+package com.test.test.surfacegraph.calculations.impl;
 
-import com.test.test.calculations.FuncSurface;
-import com.test.test.calculations.SurfaceRenderer;
+import com.test.test.surfacegraph.calculations.FuncSurface;
+import com.test.test.surfacegraph.calculations.SurfaceRenderer;
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;

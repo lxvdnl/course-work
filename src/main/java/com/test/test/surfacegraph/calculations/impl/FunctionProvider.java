@@ -1,10 +1,10 @@
-package com.test.test.calculations.impl;
+package com.test.test.surfacegraph.calculations.impl;
 
-import com.test.test.Params;
-import com.test.test.calculations.FuncDerivativeSurface;
-import com.test.test.calculations.FuncF;
-import com.test.test.calculations.FuncG;
-import com.test.test.calculations.FuncSurface;
+import com.test.test.config.Params;
+import com.test.test.surfacegraph.calculations.FuncDerivativeSurface;
+import com.test.test.surfacegraph.calculations.FuncF;
+import com.test.test.surfacegraph.calculations.FuncG;
+import com.test.test.surfacegraph.calculations.FuncSurface;
 
 public class FunctionProvider {
 

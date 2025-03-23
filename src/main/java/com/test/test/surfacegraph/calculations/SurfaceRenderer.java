@@ -1,4 +1,4 @@
-package com.test.test.calculations;
+package com.test.test.surfacegraph.calculations;
 
 import javafx.geometry.Point2D;
 
