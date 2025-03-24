@@ -1,6 +1,7 @@
 package com.test.test.surfacegraph;
 
 import com.test.test.HelloApplication;
+import com.test.test.bifurcationgraph.BifurcationController;
 import com.test.test.config.Params;
 import com.test.test.surfacegraph.calculations.RungeKuttaSolver;
 import com.test.test.surfacegraph.calculations.SurfaceRenderer;
@@ -62,11 +63,7 @@ public class SurfaceGraphController {
 
     @FXML
     public void initialize() {
-        chartConfig = new ChartConfig(
-                Params.MIN_X, Params.X_END, Params.MIN_Y, Params.MAX_Y
-        );
-        lineChart.setLegendVisible(false);
-        chartConfig.applyAxisConfig(xAxis, yAxis);
+        setupChartConfig();
 
         P = Params.P;
         R = Params.R;
@@ -95,23 +92,23 @@ public class SurfaceGraphController {
         drawButton.setOnAction(event -> {
             if (updateParams()) surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
             plotGraph();
-            System.out.println("graph must be on screen");
         });
 
-        bifurcationButton.setOnAction(event -> openBifurcationWindow());
+        bifurcationButton.setOnAction(event -> openBifurcationWindow(N, R));
+    }
+
+    private void setupChartConfig() {
+        chartConfig = new ChartConfig(
+                Params.MIN_X, Params.X_END, Params.MIN_Y, Params.MAX_Y
+        );
+        lineChart.setLegendVisible(false);
     }
 
     private void plotGraph() {
 
         System.out.println("plotGraph");
 
-        List<Point2D> points = rungeKuttaSolver.plotGraph(
-                FunctionProvider.DEFAULT_F,
-                FunctionProvider.DEFAULT_G,
-                Params.X_BEGIN, Params.Y_BEGIN, Params.Z_BEGIN,
-                Params.X_END, Params.STEP, Params.TOLERANCE,
-                Params.MIN_STEP, Params.MAX_STEP,
-                N, P, R);
+        List<Point2D> points = calculateGraphPoints();
 
         System.out.println("points drawn: " + points.size());
 
@@ -119,28 +116,13 @@ public class SurfaceGraphController {
 
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
 
-        double newMaxY = 0, newMinY = chartConfig.getMinY();
-
-        System.out.println("start transfer points");
-
-        List<XYChart.Data<Number, Number>> dataList = new ArrayList<>();
-        for (Point2D point : points) {
-            if (point.getY() > newMaxY) newMaxY = point.getY();
-            if (point.getY() < newMinY) newMinY = point.getY();
-            dataList.add(new XYChart.Data<>(point.getX(), point.getY()));
-        }
-
-        System.out.println("end transfer points");
+        List<XYChart.Data<Number, Number>> dataList = processGraphPoints(points);
 
         series.getData().addAll(dataList);
 
         System.out.println("series drawn: " + series.getData().size());
 
-        chartConfig.setMaxY(newMaxY);
-        chartConfig.setMinY(newMinY);
-
         chartConfig.applyAxisConfig(xAxis, yAxis);
-
         chartConfig.applySeriesConfig(series);
 
         lineChart.setAnimated(false);
@@ -151,6 +133,31 @@ public class SurfaceGraphController {
         lineChart.setAnimated(true);
 
         System.out.println("graph drawn");
+    }
+
+    private List<Point2D> calculateGraphPoints() {
+        return rungeKuttaSolver.plotGraph(
+                FunctionProvider.DEFAULT_F,
+                FunctionProvider.DEFAULT_G,
+                Params.X_BEGIN, Params.Y_BEGIN, Params.Z_BEGIN,
+                Params.X_END, Params.STEP, Params.TOLERANCE,
+                Params.MIN_STEP, Params.MAX_STEP,
+                N, P, R);
+    }
+
+    private List<XYChart.Data<Number, Number>> processGraphPoints(List<Point2D> points) {
+        double newMaxY = 0, newMinY = chartConfig.getMinY();
+        List<XYChart.Data<Number, Number>> dataList = new ArrayList<>();
+        for (Point2D point : points) {
+            if (point.getY() > newMaxY) newMaxY = point.getY();
+            if (point.getY() < newMinY) newMinY = point.getY();
+            dataList.add(new XYChart.Data<>(point.getX(), point.getY()));
+        }
+        System.out.println("newMaxY: " + newMaxY);
+        chartConfig.setMaxY(newMaxY);
+        System.out.println("newMinY: " + newMinY);
+        chartConfig.setMinY(newMinY);
+        return dataList;
     }
 
     private boolean updateParams() {
@@ -164,12 +171,16 @@ public class SurfaceGraphController {
         return false;
     }
 
-    private void openBifurcationWindow() {
+    private void openBifurcationWindow(int N, double R) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("bifurcation-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 1100, 600);
             Stage stage = new Stage();
             stage.setScene(scene);
+
+            BifurcationController controller = fxmlLoader.getController();
+            controller.initData(N, R);
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
