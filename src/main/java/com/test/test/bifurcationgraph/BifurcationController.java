@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 
 import java.util.ArrayList;
@@ -18,10 +19,10 @@ import java.util.List;
 
 public class BifurcationController {
 
-    public LineChart<Number, Number> lineChart;
 
     public NumberAxis xAxis;
     public NumberAxis yAxis;
+    public ScatterChart<Number, Number> scatterChart;
 
     private ChartConfig chartConfig;
     private final RungeKuttaSolver rungeKuttaSolver = new RungeKuttaWithImpactsImpl();
@@ -44,7 +45,7 @@ public class BifurcationController {
         chartConfig = new ChartConfig(
                 Params.BIFURCATION_P_BEGIN, Params.BIFURCATION_P_END, Params.MIN_Y, Params.MAX_Y
         );
-        lineChart.setLegendVisible(false);
+        scatterChart.setLegendVisible(false);
     }
 
     private void plotGraph() {
@@ -63,12 +64,12 @@ public class BifurcationController {
         chartConfig.applyAxisConfig(xAxis, yAxis);
         chartConfig.applySeriesConfig(series);
 
-        lineChart.setAnimated(false);
-        if (!lineChart.getData().isEmpty()) {
-            lineChart.getData().removeFirst();
+        scatterChart.setAnimated(false);
+        if (!scatterChart.getData().isEmpty()) {
+            scatterChart.getData().removeFirst();
         }
-        lineChart.getData().add(series);
-        lineChart.setAnimated(true);
+        scatterChart.getData().add(series);
+        scatterChart.setAnimated(true);
 
         System.out.println("graph drawn");
     }

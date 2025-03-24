@@ -16,6 +16,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
@@ -30,6 +31,7 @@ public class SurfaceGraphController {
 
     @FXML
     public Button drawButton;
+    public ScatterChart<Number, Number> scatterChart;
 
     @FXML
     private Button bifurcationButton;
@@ -45,9 +47,6 @@ public class SurfaceGraphController {
 
     public TextField textFieldR;
     public Slider sliderR;
-
-    @FXML
-    private LineChart<Number, Number> lineChart;
 
     @FXML
     private NumberAxis xAxis;
@@ -101,7 +100,7 @@ public class SurfaceGraphController {
         chartConfig = new ChartConfig(
                 Params.MIN_X, Params.X_END, Params.MIN_Y, Params.MAX_Y
         );
-        lineChart.setLegendVisible(false);
+        scatterChart.setLegendVisible(false);
     }
 
     private void plotGraph() {
@@ -125,12 +124,12 @@ public class SurfaceGraphController {
         chartConfig.applyAxisConfig(xAxis, yAxis);
         chartConfig.applySeriesConfig(series);
 
-        lineChart.setAnimated(false);
-        if (!lineChart.getData().isEmpty()) {
-            lineChart.getData().removeFirst();
+        scatterChart.setAnimated(false);
+        if (!scatterChart.getData().isEmpty()) {
+            scatterChart.getData().removeFirst();
         }
-        lineChart.getData().add(series);
-        lineChart.setAnimated(true);
+        scatterChart.getData().add(series);
+        scatterChart.setAnimated(true);
 
         System.out.println("graph drawn");
     }

@@ -40,6 +40,6 @@ public class Params {
     public static final int SKIP_IMPACTS_NUM = 1000;
     public static final double BIFURCATION_P_BEGIN = 0.196;
     public static final double BIFURCATION_P_END = 0.218;
-    public static final double BIFURCATION_P_STEP = 0.00005;
+    public static final double BIFURCATION_P_STEP = 0.00004;
 
 }
