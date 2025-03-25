@@ -5,11 +5,9 @@ import com.test.test.config.ChartConfig;
 import com.test.test.config.Params;
 import com.test.test.surfacegraph.calculations.RungeKuttaSolver;
 import com.test.test.surfacegraph.calculations.impl.FunctionProvider;
-import com.test.test.surfacegraph.calculations.impl.RungeKuttaSolverImpl;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
@@ -29,10 +27,14 @@ public class BifurcationController {
 
     private int N;
     private double R;
+    private double pBegin, pEnd, pStep;
 
-    public void initData(int N, double R) {
+    public void initData(int N, double R, double pBegin, double pEnd, double pStep) {
         this.N = N;
         this.R = R;
+        this.pBegin = pBegin;
+        this.pEnd = pEnd;
+        this.pStep = pStep;
     }
 
     @FXML
@@ -76,7 +78,7 @@ public class BifurcationController {
 
     private List<Point2D> calculateGraphPoints() {
         List<Point2D> points = new ArrayList<>();
-        for(double p = Params.BIFURCATION_P_BEGIN; p <= Params.BIFURCATION_P_END; p += Params.BIFURCATION_P_STEP) {
+        for (double p = pBegin; p <= pEnd; p += pStep) {
             System.out.println("p=" + p);
             points.addAll(
                     rungeKuttaSolver.plotGraph(
@@ -101,6 +103,8 @@ public class BifurcationController {
         }
         chartConfig.setMaxY(newMaxY);
         chartConfig.setMinY(newMinY);
+        chartConfig.setMinX(pBegin);
+        chartConfig.setMaxX(pEnd);
         return dataList;
     }
 }

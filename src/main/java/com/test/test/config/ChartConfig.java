@@ -6,7 +6,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 public class ChartConfig {
-    private final double minX, maxX;
+    private double minX, maxX;
     private double minY, maxY;
 
     public ChartConfig(double minX, double maxX, double minY, double maxY) {
@@ -47,5 +47,13 @@ public class ChartConfig {
 
     public double getMaxY() {
         return maxY;
+    }
+
+    public void setMinX(double minX) {
+        this.minX = minX;
+    }
+
+    public void setMaxX(double maxX) {
+        this.maxX = maxX;
     }
 }

@@ -12,6 +12,7 @@ import com.test.test.config.ChartConfig;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -19,13 +20,20 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
+import javafx.scene.layout.GridPane;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SurfaceGraphController {
 
@@ -86,7 +94,7 @@ public class SurfaceGraphController {
 
         surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
 
-        Platform.runLater(this::plotGraph);
+        plotGraph();
 
         drawButton.setOnAction(event -> {
             if (updateParams()) surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
@@ -171,19 +179,69 @@ public class SurfaceGraphController {
     }
 
     private void openBifurcationWindow(int N, double R) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("bifurcation-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 1100, 600);
-            Stage stage = new Stage();
-            stage.setScene(scene);
+        // Создаем диалоговое окно
+        Dialog<List<Double>> dialog = new Dialog<>();
+        dialog.setTitle("Введите параметры");
 
-            BifurcationController controller = fxmlLoader.getController();
-            controller.initData(N, R);
+        // Создаем кнопки OK и Cancel
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Создаем поля ввода
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField pBeginField = new TextField(String.valueOf(Params.BIFURCATION_P_BEGIN));
+        TextField pEndField = new TextField(String.valueOf(Params.BIFURCATION_P_END));
+        TextField pStepField = new TextField(String.valueOf(Params.BIFURCATION_P_STEP));
+
+        grid.add(new Label("pBegin:"), 0, 0);
+        grid.add(pBeginField, 1, 0);
+        grid.add(new Label("pEnd:"), 0, 1);
+        grid.add(pEndField, 1, 1);
+        grid.add(new Label("pStep:"), 0, 2);
+        grid.add(pStepField, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Конвертируем результат в список значений
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                try {
+                    double pBegin = Double.parseDouble(pBeginField.getText());
+                    double pEnd = Double.parseDouble(pEndField.getText());
+                    double pStep = Double.parseDouble(pStepField.getText());
+                    return List.of(pBegin, pEnd, pStep);
+                } catch (NumberFormatException e) {
+                    System.out.println("Ошибка: Введены некорректные значения!");
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        Optional<List<Double>> result = dialog.showAndWait();
+        result.ifPresent(params -> {
+            try {
+                double pBegin = params.get(0);
+                double pEnd = params.get(1);
+                double pStep = params.get(2);
+
+                FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("bifurcation-view.fxml"));
+                Scene scene = new Scene(fxmlLoader.load(), 1100, 600);
+                Stage stage = new Stage();
+                stage.setScene(scene);
+
+                BifurcationController controller = fxmlLoader.getController();
+                controller.initData(N, R, pBegin, pEnd, pStep);
+
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 }
