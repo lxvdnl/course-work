@@ -51,7 +51,6 @@ public class BifurcationController {
     }
 
     private void plotGraph() {
-        System.out.println("plotGraph");
 
         List<Point2D> points = calculateGraphPoints();
 
@@ -61,10 +60,8 @@ public class BifurcationController {
 
         series.getData().addAll(dataList);
 
-        System.out.println("series drawn: " + series.getData().size());
-
         chartConfig.applyAxisConfig(xAxis, yAxis);
-        chartConfig.applySeriesConfig(series);
+        chartConfig.applySeriesConfig(series, false);
 
         scatterChart.setAnimated(false);
         if (!scatterChart.getData().isEmpty()) {
@@ -101,8 +98,8 @@ public class BifurcationController {
             if (point.getY() < newMinY) newMinY = point.getY();
             dataList.add(new XYChart.Data<>(point.getX(), point.getY()));
         }
-        chartConfig.setMaxY(newMaxY);
         chartConfig.setMinY(newMinY);
+        chartConfig.setMaxY(newMaxY);
         chartConfig.setMinX(pBegin);
         chartConfig.setMaxX(pEnd);
         return dataList;

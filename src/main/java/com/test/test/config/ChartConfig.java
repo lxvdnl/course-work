@@ -26,10 +26,17 @@ public class ChartConfig {
         yAxis.setUpperBound(Math.floor(maxY) + 1);
     }
 
-    public void applySeriesConfig(XYChart.Series<Number, Number> series) {
-        for (XYChart.Data<Number, Number> data : series.getData()) {
-            Circle point = new Circle(1, Color.RED);
-            data.setNode(point);
+    public void applySeriesConfig(XYChart.Series<Number, Number> series, boolean isSurface) {
+        if (!isSurface) {
+            for (XYChart.Data<Number, Number> data : series.getData()) {
+                Circle point = new Circle(1.5, Color.RED);
+                data.setNode(point);
+            }
+        } else {
+            for (XYChart.Data<Number, Number> data : series.getData()) {
+                Circle point = new Circle(2, Color.ORANGE);
+                data.setNode(point);
+            }
         }
     }
 

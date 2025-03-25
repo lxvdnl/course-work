@@ -112,32 +112,26 @@ public class SurfaceGraphController {
     }
 
     private void plotGraph() {
+        scatterChart.setAnimated(false);
+        scatterChart.getData().clear(); // Очистка диаграммы перед перерисовкой
 
-        System.out.println("plotGraph");
+        // Отрисовка поверхности
+        XYChart.Series<Number, Number> surfaceSeries = new XYChart.Series<>();
+        List<XYChart.Data<Number, Number>> surfaceDataList = processGraphPoints(surfacePoints);
+        surfaceSeries.getData().addAll(surfaceDataList);
+        chartConfig.applySeriesConfig(surfaceSeries, true);
 
+        // Отрисовка графика
         List<Point2D> points = calculateGraphPoints();
-
-        System.out.println("points drawn: " + points.size());
-
-        points.addAll(surfacePoints);
-
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
-
         List<XYChart.Data<Number, Number>> dataList = processGraphPoints(points);
-
         series.getData().addAll(dataList);
+        chartConfig.applySeriesConfig(series, false);
 
-        System.out.println("series drawn: " + series.getData().size());
+        scatterChart.getData().addAll(surfaceSeries, series);
+        scatterChart.setAnimated(true);
 
         chartConfig.applyAxisConfig(xAxis, yAxis);
-        chartConfig.applySeriesConfig(series);
-
-        scatterChart.setAnimated(false);
-        if (!scatterChart.getData().isEmpty()) {
-            scatterChart.getData().removeFirst();
-        }
-        scatterChart.getData().add(series);
-        scatterChart.setAnimated(true);
 
         System.out.println("graph drawn");
     }
@@ -160,9 +154,7 @@ public class SurfaceGraphController {
             if (point.getY() < newMinY) newMinY = point.getY();
             dataList.add(new XYChart.Data<>(point.getX(), point.getY()));
         }
-        System.out.println("newMaxY: " + newMaxY);
         chartConfig.setMaxY(newMaxY);
-        System.out.println("newMinY: " + newMinY);
         chartConfig.setMinY(newMinY);
         return dataList;
     }
@@ -179,15 +171,12 @@ public class SurfaceGraphController {
     }
 
     private void openBifurcationWindow(int N, double R) {
-        // Создаем диалоговое окно
         Dialog<List<Double>> dialog = new Dialog<>();
         dialog.setTitle("Введите параметры");
 
-        // Создаем кнопки OK и Cancel
         ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        // Создаем поля ввода
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -206,7 +195,6 @@ public class SurfaceGraphController {
 
         dialog.getDialogPane().setContent(grid);
 
-        // Конвертируем результат в список значений
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == okButtonType) {
                 try {
