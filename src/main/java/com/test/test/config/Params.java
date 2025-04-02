@@ -2,10 +2,10 @@ package com.test.test.config;
 
 public class Params {
 
-    public static final int N = 1;
+    public static final int N = 3;
 
     public static final double P = 1.5;
-    public static final double R = 0.4;
+    public static final double R = 0.8;
     public static final double M = 0.1;
 
     public static final double Y1 = 4;
@@ -38,8 +38,8 @@ public class Params {
 
     public static final int IMPACTS_NUM = 200;
     public static final int SKIP_IMPACTS_NUM = 1000;
-    public static final double BIFURCATION_P_BEGIN = 0.196;
-    public static final double BIFURCATION_P_END = 0.218;
-    public static final double BIFURCATION_P_STEP = 0.00004;
+    public static final double BIFURCATION_P_BEGIN = 0.24;
+    public static final double BIFURCATION_P_END = 0.3;
+    public static final double BIFURCATION_P_STEP = 0.0004;
 
 }
