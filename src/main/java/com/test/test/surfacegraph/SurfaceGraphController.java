@@ -16,39 +16,22 @@ import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.scene.layout.GridPane;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class SurfaceGraphController {
 
     @FXML
-    public Button drawButton;
-
-    @FXML
     private Canvas canvas;
 
     @FXML
     private Button bifurcationButton;
-
-    int N;
-    double P, R;
-
-    double minX, maxX, minY, maxY;
 
     public TextField textFieldN;
     public Slider sliderN;
@@ -59,10 +42,15 @@ public class SurfaceGraphController {
     public TextField textFieldR;
     public Slider sliderR;
 
+
+    int N;
+    double P, R;
+    double minX, maxX, minY, maxY;
+
     private final RungeKuttaSolver rungeKuttaSolver = new RungeKuttaSolverImpl();
     private final SurfaceRenderer surfaceRenderer = new SurfaceRendererImpl();
 
-    List<Point2D> surfacePoints;
+    List<Point2D> surfacePoints, graphPoints;
 
     @FXML
     public void initialize() {
@@ -77,39 +65,41 @@ public class SurfaceGraphController {
         sliderR.setValue(Params.R);
         textFieldR.setText(String.format("%.2f", Params.R));
 
-        // Слушатель для слайдера N
-        sliderN.valueProperty().addListener((observable, oldValue, newValue) -> {
+        // N slider listener
+        sliderN.valueProperty().addListener((_, _, newValue) -> {
             textFieldN.setText(String.valueOf(newValue.intValue()));
             N = newValue.intValue();
             surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
             plotGraph();
         });
 
-        // Слушатель для слайдера P
-        sliderP.valueProperty().addListener((observable, oldValue, newValue) -> {
+        // P slider listener
+        sliderP.valueProperty().addListener((_, _, newValue) -> {
             textFieldP.setText(String.format("%.2f", newValue.doubleValue()));
             P = newValue.doubleValue();
             plotGraph();
         });
 
-        // Слушатель для слайдера R
-        sliderR.valueProperty().addListener((observable, oldValue, newValue) -> {
+        // R slider listener
+        sliderR.valueProperty().addListener((_, _, newValue) -> {
             textFieldR.setText(String.format("%.2f", newValue.doubleValue()));
             R = newValue.doubleValue();
             plotGraph();
         });
 
+        // Entry plotting
         Platform.runLater(() -> {
             surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
             plotGraph();
         });
 
-        bifurcationButton.setOnAction(event -> openBifurcationWindow(N, R));
+        bifurcationButton.setOnAction(_ -> openBifurcationWindow(N, R));
     }
 
+    // Main method for plotting all visuals in canvas
     private void plotGraph() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); // Очистка canvas перед рисованием
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         double canvasWidth = canvas.getWidth();
         double canvasHeight = canvas.getHeight();
@@ -117,44 +107,20 @@ public class SurfaceGraphController {
         minX = Params.MIN_X;
         maxX = Params.X_END;
 
-        // Рисуем оси
-        List<Point2D> points = calculateGraphPoints();
-        findMinMaxY(points, surfacePoints);
+        graphPoints = calculateGraphPoints();
+        findMinMaxY(graphPoints, surfacePoints);
+
         drawAxes(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
 
-        // Отрисовка координатных прямых
-        drawCoordinateLines(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
-
-        // Отрисовка точек
         drawPoints(gc, surfacePoints, canvasWidth, canvasHeight, minX, maxX, minY, maxY, Color.RED);
-        drawPoints(gc, points, canvasWidth, canvasHeight, minX, maxX, minY, maxY, Color.BLUE);
+        drawPoints(gc, graphPoints, canvasWidth, canvasHeight, minX, maxX, minY, maxY, Color.BLUE);
     }
 
-    private void drawCoordinateLines(GraphicsContext gc, double width, double height, double minX, double maxX, double minY, double maxY) {
-        gc.setStroke(Color.LIGHTGRAY);  // Устанавливаем более светлый цвет для сетки
-        gc.setLineWidth(1);
-
-        // Отрисовка вертикальных координатных линий
-        double stepX = (width - 100) / 10;  // 10 делений по оси X
-        for (int i = 0; i <= 10; i++) {
-            double x = 50 + i * stepX;
-            gc.strokeLine(x, 50, x, height - 50);  // Рисуем вертикальные линии
-        }
-
-        // Отрисовка горизонтальных координатных линий
-        double stepY = (height - 100) / 10;  // 10 делений по оси Y
-        for (int i = 0; i <= 10; i++) {
-            double y = 50 + i * stepY;
-            gc.strokeLine(50, y, width - 50, y);  // Рисуем горизонтальные линии
-        }
-    }
-
-    private void findMinMaxY(List<Point2D> points, List<Point2D> surfacePoints) {
+    private void findMinMaxY(List<Point2D> graphPoints, List<Point2D> surfacePoints) {
         double minY = Double.MAX_VALUE;
         double maxY = Double.MIN_VALUE;
 
-        // Перебираем точки в points
-        for (Point2D point : points) {
+        for (Point2D point : graphPoints) {
             if (point.getY() < minY) {
                 minY = point.getY();
             }
@@ -163,7 +129,6 @@ public class SurfaceGraphController {
             }
         }
 
-        // Перебираем точки в surfacePoints
         for (Point2D point : surfacePoints) {
             if (point.getY() < minY) {
                 minY = point.getY();
@@ -178,32 +143,45 @@ public class SurfaceGraphController {
     }
 
     private void drawAxes(GraphicsContext gc, double width, double height, double minX, double maxX, double minY, double maxY) {
-        // Рисуем ось X (слева направо)
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
-        gc.strokeLine(50, height - 50, width - 50, height - 50);  // Ось X
+        gc.strokeLine(50, height - 50, width - 50, height - 50); // X
+        gc.strokeLine(50, 50, 50, height - 50); // Y
 
-        // Рисуем ось Y (сверху вниз)
-        gc.strokeLine(50, 50, 50, height - 50);  // Ось Y
-
-        // Подписи осей
         gc.setFill(Color.BLACK);
-        gc.fillText("τ", width - 40, height - 20);  // Подпись оси X
-        gc.fillText("x", 20, 40);  // Подпись оси Y
+        gc.fillText("τ", width - 40, height - 20);
+        gc.fillText("x", 20, 40);
 
-        // Деления на оси X
-        double stepX = (width - 100) / 10;  // 10 делений
+        double stepX = (width - 100) / 10;
         for (int i = 0; i <= 10; i++) {
             double x = 50 + i * stepX;
-            gc.fillText(String.format("%.2f", minX + i * (maxX - minX) / 10), x - 10, height - 30);  // Метки для оси X
+            gc.fillText(String.format("%.2f", minX + i * (maxX - minX) / 10), x - 10, height - 30);
         }
 
-        // Деления на оси Y (снизу вверх)
-        double stepY = (height - 100) / 10;  // 10 делений
+        double stepY = (height - 100) / 10;
         for (int i = 0; i <= 10; i++) {
-            double y = height - 50 - i * stepY;  // Инвертируем Y, чтобы считать сверху вниз
-            gc.strokeLine(50, y, 60, y);  // Деления на оси Y
-            gc.fillText(String.format("%.2f", minY + i * (maxY - minY) / 10), 20, y + 5);  // Метки для оси Y
+            double y = height - 50 - i * stepY;
+            gc.strokeLine(50, y, 60, y);
+            gc.fillText(String.format("%.2f", minY + i * (maxY - minY) / 10), 20, y + 5);
+        }
+
+        drawCoordinateLines(gc, width, height);
+    }
+
+    private void drawCoordinateLines(GraphicsContext gc, double width, double height) {
+        gc.setStroke(Color.LIGHTGRAY);
+        gc.setLineWidth(1);
+
+        double stepX = (width - 100) / 10;
+        for (int i = 0; i <= 10; i++) {
+            double x = 50 + i * stepX;
+            gc.strokeLine(x, 50, x, height - 50);
+        }
+
+        double stepY = (height - 100) / 10;
+        for (int i = 0; i <= 10; i++) {
+            double y = 50 + i * stepY;
+            gc.strokeLine(50, y, width - 50, y);
         }
     }
 
@@ -211,13 +189,9 @@ public class SurfaceGraphController {
                             double minX, double maxX, double minY, double maxY, Color color) {
         gc.setFill(color);
         for (Point2D point : points) {
-            // Сдвиг по оси X на 50 пикселей, так как ось Y начинается с 50
-            double x = (point.getX() - minX) / (maxX - minX) * (width - 100) + 50;  // Сдвиг от оси X
-
-            // Сдвиг по оси Y на 50 пикселей, так как ось X заканчивается на height - 50
-            double y = height - (point.getY() - minY) / (maxY - minY) * (height - 100) - 50; // Сдвиг от оси Y
-
-            gc.fillOval(x - 1, y - 1, 2, 2); // Рисуем точку 2x2 пикселя
+            double x = (point.getX() - minX) / (maxX - minX) * (width - 100) + 50;
+            double y = height - (point.getY() - minY) / (maxY - minY) * (height - 100) - 50;
+            gc.fillOval(x - 1, y - 1, 2, 2); // Draw point
         }
     }
 
@@ -247,11 +221,11 @@ public class SurfaceGraphController {
         TextField pEndField = new TextField(String.valueOf(Params.BIFURCATION_P_END));
         TextField pStepField = new TextField(String.valueOf(Params.BIFURCATION_P_STEP));
 
-        grid.add(new Label("pBegin:"), 0, 0);
+        grid.add(new Label("Начальное P:"), 0, 0);
         grid.add(pBeginField, 1, 0);
-        grid.add(new Label("pEnd:"), 0, 1);
+        grid.add(new Label("Конечное P:"), 0, 1);
         grid.add(pEndField, 1, 1);
-        grid.add(new Label("pStep:"), 0, 2);
+        grid.add(new Label("Шаг:"), 0, 2);
         grid.add(pStepField, 1, 2);
 
         dialog.getDialogPane().setContent(grid);
@@ -289,7 +263,7 @@ public class SurfaceGraphController {
 
                 stage.show();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("Exception: " + e);
             }
         });
     }

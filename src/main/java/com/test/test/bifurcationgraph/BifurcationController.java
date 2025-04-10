@@ -19,12 +19,15 @@ public class BifurcationController {
     @FXML
     private Canvas canvas;
 
-    private final RungeKuttaSolver rungeKuttaSolver = new RungeKuttaWithImpactsImpl();
 
     private int N;
     private double R;
     private double pBegin, pEnd, pStep;
     double minX, maxX, minY, maxY;
+
+    List<Point2D> bifurcationPoints;
+
+    private final RungeKuttaSolver rungeKuttaSolver = new RungeKuttaWithImpactsImpl();
 
     public void initData(int N, double R, double pBegin, double pEnd, double pStep) {
         this.N = N;
@@ -41,7 +44,7 @@ public class BifurcationController {
 
     private void plotGraph() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); // Очистка canvas перед рисованием
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         double canvasWidth = canvas.getWidth();
         double canvasHeight = canvas.getHeight();
@@ -51,39 +54,32 @@ public class BifurcationController {
         minY = Params.MIN_Y;
         maxY = Params.MAX_Y;
 
-        // Рисуем оси
-        drawAxes(gc, canvasWidth, canvasHeight);
 
-        List<Point2D> points = calculateGraphPoints();
+        bifurcationPoints = calculateBifurcationPoints();
 
-        findMinMaxY(points);
+        findMinMaxY(bifurcationPoints);
+        drawAxes(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
 
-        // Отрисовка координатных прямых
-        drawCoordinateLines(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
-
-        drawPoints(gc, points, canvasWidth, canvasHeight, minX, maxX, minY, maxY, Color.BLUE);
+        drawPoints(gc, bifurcationPoints, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
     }
 
 
-    private void drawPoints(GraphicsContext gc, List<Point2D> points, double width, double height,
-                            double minX, double maxX, double minY, double maxY, Color color) {
-        gc.setFill(color);
-        for (Point2D point : points) {
-            // Сдвиг по оси X на 50 пикселей, так как ось Y начинается с 50
-            double x = (point.getX() - minX) / (maxX - minX) * (width - 100) + 50;  // Сдвиг от оси X
+    private void drawPoints(GraphicsContext gc, List<Point2D> bifurcationPoints, double width, double height,
+                            double minX, double maxX, double minY, double maxY) {
+        gc.setFill(Color.BLUE);
+        for (Point2D point : bifurcationPoints) {
+            double x = (point.getX() - minX) / (maxX - minX) * (width - 100) + 50;
+            double y = height - (point.getY() - minY) / (maxY - minY) * (height - 100) - 50;
 
-            // Сдвиг по оси Y на 50 пикселей, так как ось X заканчивается на height - 50
-            double y = height - (point.getY() - minY) / (maxY - minY) * (height - 100) - 50; // Сдвиг от оси Y
-
-            gc.fillOval(x - 1, y - 1, 2, 2); // Рисуем точку 2x2 пикселя
+            gc.fillOval(x - 1, y - 1, 2, 2); // Draw point
         }
     }
 
-    private List<Point2D> calculateGraphPoints() {
-        List<Point2D> points = new ArrayList<>();
+    private List<Point2D> calculateBifurcationPoints() {
+        List<Point2D> bifurcationPoints = new ArrayList<>();
         for (double p = pBegin; p <= pEnd; p += pStep) {
             System.out.println("p=" + p);
-            points.addAll(
+            bifurcationPoints.addAll(
                     rungeKuttaSolver.plotGraph(
                             FunctionProvider.DEFAULT_F,
                             FunctionProvider.DEFAULT_G,
@@ -93,25 +89,23 @@ public class BifurcationController {
                             N, p, R)
             );
         }
-        return points;
+        return bifurcationPoints;
     }
 
-    private void drawCoordinateLines(GraphicsContext gc, double width, double height, double minX, double maxX, double minY, double maxY) {
-        gc.setStroke(Color.LIGHTGRAY);  // Устанавливаем более светлый цвет для сетки
+    private void drawCoordinateLines(GraphicsContext gc, double width, double height) {
+        gc.setStroke(Color.LIGHTGRAY);
         gc.setLineWidth(1);
 
-        // Отрисовка вертикальных координатных линий
-        double stepX = (width - 100) / 10;  // 10 делений по оси X
+        double stepX = (width - 100) / 10;
         for (int i = 0; i <= 10; i++) {
             double x = 50 + i * stepX;
-            gc.strokeLine(x, 50, x, height - 50);  // Рисуем вертикальные линии
+            gc.strokeLine(x, 50, x, height - 50);
         }
 
-        // Отрисовка горизонтальных координатных линий
-        double stepY = (height - 100) / 10;  // 10 делений по оси Y
+        double stepY = (height - 100) / 10;
         for (int i = 0; i <= 10; i++) {
             double y = 50 + i * stepY;
-            gc.strokeLine(50, y, width - 50, y);  // Рисуем горизонтальные линии
+            gc.strokeLine(50, y, width - 50, y);
         }
     }
 
@@ -119,7 +113,6 @@ public class BifurcationController {
         double minY = Double.MAX_VALUE;
         double maxY = Double.MIN_VALUE;
 
-        // Перебираем точки в points
         for (Point2D point : points) {
             if (point.getY() < minY) {
                 minY = point.getY();
@@ -130,36 +123,33 @@ public class BifurcationController {
         }
 
         this.minY = minY;
-        this.maxY = maxY + maxY/4;
+        this.maxY = maxY + maxY / 4;
     }
 
-    private void drawAxes(GraphicsContext gc, double width, double height) {
-        // Рисуем ось X (слева направо)
+    private void drawAxes(GraphicsContext gc, double width, double height, double minX, double maxX, double minY, double maxY) {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
-        gc.strokeLine(50, height - 50, width - 50, height - 50);  // Ось X
+        gc.strokeLine(50, height - 50, width - 50, height - 50);  // X
+        gc.strokeLine(50, 50, 50, height - 50);  // Y
 
-        // Рисуем ось Y (сверху вниз)
-        gc.strokeLine(50, 50, 50, height - 50);  // Ось Y
-
-        // Подписи осей
         gc.setFill(Color.BLACK);
-        gc.fillText("P", width - 40, height - 20);  // Подпись оси X
-        gc.fillText("Z", 20, 40);  // Подпись оси Y
+        gc.fillText("P", width - 40, height - 20);
+        gc.fillText("Z", 20, 40);
 
-        // Деления на оси X
-        double stepX = (width - 100) / 10;  // 10 делений
+        double stepX = (width - 100) / 10;
         for (int i = 0; i <= 10; i++) {
             double x = 50 + i * stepX;
-            gc.fillText(String.format("%.2f", minX + i * (maxX - minX) / 10), x - 10, height - 30);  // Метки для оси X
+            gc.fillText(String.format("%.2f", minX + i * (maxX - minX) / 10), x - 10, height - 30);
         }
 
-        // Деления на оси Y (снизу вверх)
-        double stepY = (height - 100) / 10;  // 10 делений
+        double stepY = (height - 100) / 10;
         for (int i = 0; i <= 10; i++) {
-            double y = height - 50 - i * stepY;  // Инвертируем Y, чтобы считать сверху вниз
-            gc.strokeLine(50, y, 60, y);  // Деления на оси Y
-            gc.fillText(String.format("%.2f", minY + i * (maxY - minY) / 10), 20, y + 5);  // Метки для оси Y
+            double y = height - 50 - i * stepY;
+            gc.strokeLine(50, y, 60, y);
+            gc.fillText(String.format("%.2f", minY + i * (maxY - minY) / 10), 20, y + 5);
         }
+
+        drawCoordinateLines(gc, width, height);
     }
+
 }

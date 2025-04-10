@@ -64,7 +64,6 @@ public class RungeKuttaWithImpactsImpl implements RungeKuttaSolver {
 
                 if (nextY <= surfaceValue && nextZ - df_dtau < 0) {
                     double t = (surfaceValue - yBegin) / (nextY - yBegin);
-                    double xImpact = xBegin + t * currentStep;
                     double zImpact = zBegin + t * (nextZ - zBegin);
 
                     nextY = surfaceValue;
