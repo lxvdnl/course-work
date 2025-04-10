@@ -84,8 +84,8 @@ public class BifurcationController {
                             FunctionProvider.DEFAULT_F,
                             FunctionProvider.DEFAULT_G,
                             Params.X_BEGIN, Params.Y_BEGIN, Params.Z_BEGIN,
-                            Params.X_END, Params.STEP, Params.TOLERANCE,
-                            Params.MIN_STEP, Params.MAX_STEP,
+                            Params.X_END, Params.STEP, Params.BIFURCATION_P_TOLERANCE,
+                            Params.BIFURCATION_P_MIN_STEP, Params.MAX_STEP,
                             N, p, R)
             );
         }
