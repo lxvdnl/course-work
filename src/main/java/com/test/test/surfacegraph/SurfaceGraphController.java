@@ -116,15 +116,12 @@ public class SurfaceGraphController {
 
         minX = Params.MIN_X;
         maxX = Params.X_END;
-        minY = Params.MIN_Y;
-        maxY = Params.MAX_Y;
 
         // Рисуем оси
-        drawAxes(gc, canvasWidth, canvasHeight);
-
         List<Point2D> points = calculateGraphPoints();
-
         findMinMaxY(points, surfacePoints);
+        drawAxes(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
+
         // Отрисовка координатных прямых
         drawCoordinateLines(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
 
@@ -180,7 +177,7 @@ public class SurfaceGraphController {
         this.maxY = maxY;
     }
 
-    private void drawAxes(GraphicsContext gc, double width, double height) {
+    private void drawAxes(GraphicsContext gc, double width, double height, double minX, double maxX, double minY, double maxY) {
         // Рисуем ось X (слева направо)
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
@@ -234,17 +231,6 @@ public class SurfaceGraphController {
                 N, P, R);
     }
 
-    private boolean updateParams() {
-        P = sliderP.getValue();
-        R = sliderR.getValue();
-        int tmpN = (int) sliderN.getValue();
-        if (tmpN != N) {
-            N = tmpN;
-            return true;
-        }
-        return false;
-    }
-
     private void openBifurcationWindow(int N, double R) {
         Dialog<List<Double>> dialog = new Dialog<>();
         dialog.setTitle("Введите параметры");
@@ -293,8 +279,9 @@ public class SurfaceGraphController {
                 double pStep = params.get(2);
 
                 FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("bifurcation-view.fxml"));
-                Scene scene = new Scene(fxmlLoader.load(), 1100, 600);
+                Scene scene = new Scene(fxmlLoader.load(), 1200, 600);
                 Stage stage = new Stage();
+                stage.setResizable(false);
                 stage.setScene(scene);
 
                 BifurcationController controller = fxmlLoader.getController();

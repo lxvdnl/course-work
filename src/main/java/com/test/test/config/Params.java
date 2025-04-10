@@ -26,8 +26,8 @@ public class Params {
     public static final double MAX_Y = 4;
 
     public static final double X_BEGIN = 0;
-    public static final double Y_BEGIN = 1;
-    public static final double Z_BEGIN = 1.5;
+    public static final double Y_BEGIN = 0.5;
+    public static final double Z_BEGIN = 0.5;
 
     public static final double X_END = 50 + STEP;
 
@@ -39,6 +39,6 @@ public class Params {
     public static final int SKIP_IMPACTS_NUM = 200;
     public static final double BIFURCATION_P_BEGIN = 0.196;
     public static final double BIFURCATION_P_END = 0.218;
-    public static final double BIFURCATION_P_STEP = 0.00001;
+    public static final double BIFURCATION_P_STEP = 0.001;
 
 }

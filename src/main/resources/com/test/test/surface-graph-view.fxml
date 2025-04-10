@@ -5,14 +5,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.surfacegraph.SurfaceGraphController">
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="1200.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.surfacegraph.SurfaceGraphController">
 
     <!-- Первый VBox для Canvas -->
-    <VBox prefHeight="400.0" prefWidth="800.0" style="-fx-background-color: #ffffff;" VBox.vgrow="ALWAYS">
+    <VBox prefHeight="400.0" prefWidth="1100.0" style="-fx-background-color: #ffffff;" VBox.vgrow="ALWAYS">
         <VBox.margin>
             <Insets bottom="20.0" left="50.0" right="50.0" top="20.0" />
         </VBox.margin>
-        <Canvas fx:id="canvas" height="400.0" width="800.0" />
+        <Canvas fx:id="canvas" height="400.0" width="1100.0" />
     </VBox>
 
     <!-- Второй VBox для кнопок и других элементов управления -->
