@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.chart.*?>
+
+<?import javafx.scene.canvas.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="600.0" prefWidth="1100.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.bifurcationgraph.BifurcationController">
-    <ScatterChart fx:id="scatterChart" legendSide="TOP" prefHeight="600.0" prefWidth="1000.0" title="Graph">
-        <xAxis>
-            <NumberAxis autoRanging="false" label="P" tickUnit="0.002" upperBound="1.0" fx:id="xAxis" />
-        </xAxis>
-        <yAxis>
-            <NumberAxis fx:id="yAxis" autoRanging="false" label="Z" lowerBound="-4.0" tickUnit="1.0" upperBound="1.0" />
-        </yAxis>
-    </ScatterChart>
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="1100.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.bifurcationgraph.BifurcationController">
+    <Canvas fx:id="canvas" height="400.0" width="1000.0" />
 </VBox>

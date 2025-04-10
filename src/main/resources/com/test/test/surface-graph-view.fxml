@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.*?>
-<?import javafx.scene.chart.*?>
+<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="600.0" prefWidth="1100.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.surfacegraph.SurfaceGraphController">
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: #4fc6d6;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.test.test.surfacegraph.SurfaceGraphController">
 
-    <ScatterChart fx:id="scatterChart" legendSide="TOP" prefHeight="600.0" prefWidth="1000.0" title="Graph">
-        <xAxis>
-            <NumberAxis autoRanging="false" label="τ" tickUnit="1.0" upperBound="10.0" fx:id="xAxis" />
-        </xAxis>
-        <yAxis>
-            <NumberAxis fx:id="yAxis" autoRanging="false" label="X" lowerBound="-4.0" tickUnit="1.0" upperBound="5.0" />
-        </yAxis>
-    </ScatterChart>
+    <!-- Первый VBox для Canvas -->
+    <VBox prefHeight="400.0" prefWidth="800.0" style="-fx-background-color: #ffffff;" VBox.vgrow="ALWAYS">
+        <VBox.margin>
+            <Insets bottom="20.0" left="50.0" right="50.0" top="20.0" />
+        </VBox.margin>
+        <Canvas fx:id="canvas" height="400.0" width="800.0" />
+    </VBox>
 
-    <VBox spacing="10">
+    <!-- Второй VBox для кнопок и других элементов управления -->
+    <VBox alignment="CENTER" spacing="10">
+        <VBox.margin>
+            <Insets bottom="30.0" />
+        </VBox.margin>
         <GridPane alignment="CENTER" hgap="10" vgap="10">
             <Label text="N {1, 2, 3}:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
             <Slider fx:id="sliderN" blockIncrement="1" majorTickUnit="1" max="3" min="1" minorTickCount="0" prefWidth="600" snapToTicks="true" GridPane.columnIndex="1" GridPane.rowIndex="0" />
@@ -30,15 +33,21 @@
             <Slider fx:id="sliderR" blockIncrement="0.05" majorTickUnit="0.2" max="0.95" min="0.05" prefWidth="600" snapToTicks="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <TextField fx:id="textFieldR" prefWidth="50" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
-           <Button fx:id="drawButton" prefHeight="26.0" prefWidth="104.0" text="Draw" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-
+            <Button fx:id="drawButton" prefHeight="26.0" prefWidth="104.0" text="Draw" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             <Button fx:id="bifurcationButton" prefHeight="26.0" prefWidth="104.0" text="Bifurcation" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
         </GridPane>
-
-        <VBox.margin>
-            <Insets bottom="10.0" />
-        </VBox.margin>
     </VBox>
 
 </VBox>

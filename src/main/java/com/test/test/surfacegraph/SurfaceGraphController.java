@@ -8,16 +8,15 @@ import com.test.test.surfacegraph.calculations.SurfaceRenderer;
 import com.test.test.surfacegraph.calculations.impl.FunctionProvider;
 import com.test.test.surfacegraph.calculations.impl.RungeKuttaSolverImpl;
 import com.test.test.surfacegraph.calculations.impl.SurfaceRendererImpl;
-import com.test.test.config.ChartConfig;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -26,7 +25,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.layout.GridPane;
 
@@ -39,13 +38,17 @@ public class SurfaceGraphController {
 
     @FXML
     public Button drawButton;
-    public ScatterChart<Number, Number> scatterChart;
+
+    @FXML
+    private Canvas canvas;
 
     @FXML
     private Button bifurcationButton;
 
     int N;
     double P, R;
+
+    double minX, maxX, minY, maxY;
 
     public TextField textFieldN;
     public Slider sliderN;
@@ -56,13 +59,6 @@ public class SurfaceGraphController {
     public TextField textFieldR;
     public Slider sliderR;
 
-    @FXML
-    private NumberAxis xAxis;
-
-    @FXML
-    private NumberAxis yAxis;
-
-    private ChartConfig chartConfig;
     private final RungeKuttaSolver rungeKuttaSolver = new RungeKuttaSolverImpl();
     private final SurfaceRenderer surfaceRenderer = new SurfaceRendererImpl();
 
@@ -70,8 +66,6 @@ public class SurfaceGraphController {
 
     @FXML
     public void initialize() {
-        setupChartConfig();
-
         P = Params.P;
         R = Params.R;
         N = Params.N;
@@ -83,57 +77,151 @@ public class SurfaceGraphController {
         sliderR.setValue(Params.R);
         textFieldR.setText(String.format("%.2f", Params.R));
 
-        sliderN.valueProperty().addListener((observable, oldValue, newValue) ->
-            textFieldN.setText(String.valueOf(newValue.intValue())));
+        // Слушатель для слайдера N
+        sliderN.valueProperty().addListener((observable, oldValue, newValue) -> {
+            textFieldN.setText(String.valueOf(newValue.intValue()));
+            N = newValue.intValue();
+            surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
+            plotGraph();
+        });
 
-        sliderP.valueProperty().addListener((observable, oldValue, newValue) ->
-            textFieldP.setText(String.format("%.2f", newValue.doubleValue())));
+        // Слушатель для слайдера P
+        sliderP.valueProperty().addListener((observable, oldValue, newValue) -> {
+            textFieldP.setText(String.format("%.2f", newValue.doubleValue()));
+            P = newValue.doubleValue();
+            plotGraph();
+        });
 
-        sliderR.valueProperty().addListener((observable, oldValue, newValue) ->
-            textFieldR.setText(String.format("%.2f", newValue.doubleValue())));
+        // Слушатель для слайдера R
+        sliderR.valueProperty().addListener((observable, oldValue, newValue) -> {
+            textFieldR.setText(String.format("%.2f", newValue.doubleValue()));
+            R = newValue.doubleValue();
+            plotGraph();
+        });
 
-        surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
-
-        plotGraph();
-
-        drawButton.setOnAction(event -> {
-            if (updateParams()) surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
+        Platform.runLater(() -> {
+            surfacePoints = surfaceRenderer.render(N, Params.MIN_X, Params.X_END, Params.STEP);
             plotGraph();
         });
 
         bifurcationButton.setOnAction(event -> openBifurcationWindow(N, R));
     }
 
-    private void setupChartConfig() {
-        chartConfig = new ChartConfig(
-                Params.MIN_X, Params.X_END, Params.MIN_Y, Params.MAX_Y
-        );
-        scatterChart.setLegendVisible(false);
+    private void plotGraph() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); // Очистка canvas перед рисованием
+
+        double canvasWidth = canvas.getWidth();
+        double canvasHeight = canvas.getHeight();
+
+        minX = Params.MIN_X;
+        maxX = Params.X_END;
+        minY = Params.MIN_Y;
+        maxY = Params.MAX_Y;
+
+        // Рисуем оси
+        drawAxes(gc, canvasWidth, canvasHeight);
+
+        List<Point2D> points = calculateGraphPoints();
+
+        findMinMaxY(points, surfacePoints);
+        // Отрисовка координатных прямых
+        drawCoordinateLines(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
+
+        // Отрисовка точек
+        drawPoints(gc, surfacePoints, canvasWidth, canvasHeight, minX, maxX, minY, maxY, Color.RED);
+        drawPoints(gc, points, canvasWidth, canvasHeight, minX, maxX, minY, maxY, Color.BLUE);
     }
 
-    private void plotGraph() {
-        scatterChart.setAnimated(false);
-        scatterChart.getData().clear(); // Очистка диаграммы перед перерисовкой
+    private void drawCoordinateLines(GraphicsContext gc, double width, double height, double minX, double maxX, double minY, double maxY) {
+        gc.setStroke(Color.LIGHTGRAY);  // Устанавливаем более светлый цвет для сетки
+        gc.setLineWidth(1);
 
-        // Отрисовка поверхности
-        XYChart.Series<Number, Number> surfaceSeries = new XYChart.Series<>();
-        List<XYChart.Data<Number, Number>> surfaceDataList = processGraphPoints(surfacePoints);
-        surfaceSeries.getData().addAll(surfaceDataList);
-        chartConfig.applySeriesConfig(surfaceSeries, true);
+        // Отрисовка вертикальных координатных линий
+        double stepX = (width - 100) / 10;  // 10 делений по оси X
+        for (int i = 0; i <= 10; i++) {
+            double x = 50 + i * stepX;
+            gc.strokeLine(x, 50, x, height - 50);  // Рисуем вертикальные линии
+        }
 
-        // Отрисовка графика
-        List<Point2D> points = calculateGraphPoints();
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        List<XYChart.Data<Number, Number>> dataList = processGraphPoints(points);
-        series.getData().addAll(dataList);
-        chartConfig.applySeriesConfig(series, false);
+        // Отрисовка горизонтальных координатных линий
+        double stepY = (height - 100) / 10;  // 10 делений по оси Y
+        for (int i = 0; i <= 10; i++) {
+            double y = 50 + i * stepY;
+            gc.strokeLine(50, y, width - 50, y);  // Рисуем горизонтальные линии
+        }
+    }
 
-        scatterChart.getData().addAll(surfaceSeries, series);
-        scatterChart.setAnimated(true);
+    private void findMinMaxY(List<Point2D> points, List<Point2D> surfacePoints) {
+        double minY = Double.MAX_VALUE;
+        double maxY = Double.MIN_VALUE;
 
-        chartConfig.applyAxisConfig(xAxis, yAxis);
+        // Перебираем точки в points
+        for (Point2D point : points) {
+            if (point.getY() < minY) {
+                minY = point.getY();
+            }
+            if (point.getY() > maxY) {
+                maxY = point.getY();
+            }
+        }
 
-        System.out.println("graph drawn");
+        // Перебираем точки в surfacePoints
+        for (Point2D point : surfacePoints) {
+            if (point.getY() < minY) {
+                minY = point.getY();
+            }
+            if (point.getY() > maxY) {
+                maxY = point.getY();
+            }
+        }
+
+        this.minY = minY;
+        this.maxY = maxY;
+    }
+
+    private void drawAxes(GraphicsContext gc, double width, double height) {
+        // Рисуем ось X (слева направо)
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.strokeLine(50, height - 50, width - 50, height - 50);  // Ось X
+
+        // Рисуем ось Y (сверху вниз)
+        gc.strokeLine(50, 50, 50, height - 50);  // Ось Y
+
+        // Подписи осей
+        gc.setFill(Color.BLACK);
+        gc.fillText("τ", width - 40, height - 20);  // Подпись оси X
+        gc.fillText("x", 20, 40);  // Подпись оси Y
+
+        // Деления на оси X
+        double stepX = (width - 100) / 10;  // 10 делений
+        for (int i = 0; i <= 10; i++) {
+            double x = 50 + i * stepX;
+            gc.fillText(String.format("%.2f", minX + i * (maxX - minX) / 10), x - 10, height - 30);  // Метки для оси X
+        }
+
+        // Деления на оси Y (снизу вверх)
+        double stepY = (height - 100) / 10;  // 10 делений
+        for (int i = 0; i <= 10; i++) {
+            double y = height - 50 - i * stepY;  // Инвертируем Y, чтобы считать сверху вниз
+            gc.strokeLine(50, y, 60, y);  // Деления на оси Y
+            gc.fillText(String.format("%.2f", minY + i * (maxY - minY) / 10), 20, y + 5);  // Метки для оси Y
+        }
+    }
+
+    private void drawPoints(GraphicsContext gc, List<Point2D> points, double width, double height,
+                            double minX, double maxX, double minY, double maxY, Color color) {
+        gc.setFill(color);
+        for (Point2D point : points) {
+            // Сдвиг по оси X на 50 пикселей, так как ось Y начинается с 50
+            double x = (point.getX() - minX) / (maxX - minX) * (width - 100) + 50;  // Сдвиг от оси X
+
+            // Сдвиг по оси Y на 50 пикселей, так как ось X заканчивается на height - 50
+            double y = height - (point.getY() - minY) / (maxY - minY) * (height - 100) - 50; // Сдвиг от оси Y
+
+            gc.fillOval(x - 1, y - 1, 2, 2); // Рисуем точку 2x2 пикселя
+        }
     }
 
     private List<Point2D> calculateGraphPoints() {
@@ -144,19 +232,6 @@ public class SurfaceGraphController {
                 Params.X_END, Params.STEP, Params.TOLERANCE,
                 Params.MIN_STEP, Params.MAX_STEP,
                 N, P, R);
-    }
-
-    private List<XYChart.Data<Number, Number>> processGraphPoints(List<Point2D> points) {
-        double newMaxY = 0, newMinY = chartConfig.getMinY();
-        List<XYChart.Data<Number, Number>> dataList = new ArrayList<>();
-        for (Point2D point : points) {
-            if (point.getY() > newMaxY) newMaxY = point.getY();
-            if (point.getY() < newMinY) newMinY = point.getY();
-            dataList.add(new XYChart.Data<>(point.getX(), point.getY()));
-        }
-        chartConfig.setMaxY(newMaxY);
-        chartConfig.setMinY(newMinY);
-        return dataList;
     }
 
     private boolean updateParams() {
