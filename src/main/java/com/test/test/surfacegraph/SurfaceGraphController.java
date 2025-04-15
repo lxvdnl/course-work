@@ -253,7 +253,7 @@ public class SurfaceGraphController {
                 double pStep = params.get(2);
 
                 FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("bifurcation-view.fxml"));
-                Scene scene = new Scene(fxmlLoader.load(), 1200, 600);
+                Scene scene = new Scene(fxmlLoader.load(), 1800, 600);
                 Stage stage = new Stage();
                 stage.setResizable(false);
                 stage.setScene(scene);

@@ -1,8 +1,8 @@
 package com.test.test.bifurcationgraph;
 
+import com.test.test.bifurcationgraph.calculations.impl.RungeKuttaWithImpacts;
 import com.test.test.bifurcationgraph.calculations.impl.RungeKuttaWithImpactsImpl;
 import com.test.test.config.Params;
-import com.test.test.surfacegraph.calculations.RungeKuttaSolver;
 import com.test.test.surfacegraph.calculations.impl.FunctionProvider;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -17,17 +17,22 @@ import java.util.List;
 public class BifurcationController {
 
     @FXML
-    private Canvas canvas;
+    private Canvas canvas1;
+    @FXML
+    private Canvas canvas2;
+    @FXML
+    private Canvas canvas3;
 
+    private List<Canvas> canvases;
 
     private int N;
     private double R;
     private double pBegin, pEnd, pStep;
     double minX, maxX, minY, maxY;
 
-    List<Point2D> bifurcationPoints;
+    List<List<Point2D>> bifurcationPoints;
 
-    private final RungeKuttaSolver rungeKuttaSolver = new RungeKuttaWithImpactsImpl();
+    private final RungeKuttaWithImpacts rungeKuttaSolver = new RungeKuttaWithImpactsImpl();
 
     public void initData(int N, double R, double pBegin, double pEnd, double pStep) {
         this.N = N;
@@ -39,30 +44,31 @@ public class BifurcationController {
 
     @FXML
     public void initialize() {
+        canvases = List.of(canvas1, canvas2, canvas3);
         Platform.runLater(this::plotGraph);
     }
 
     private void plotGraph() {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        double canvasWidth = canvas1.getWidth();
+        double canvasHeight = canvas1.getHeight();
 
-        double canvasWidth = canvas.getWidth();
-        double canvasHeight = canvas.getHeight();
-
-        minX = Params.BIFURCATION_P_BEGIN;
-        maxX = Params.BIFURCATION_P_END;
+        minX = pBegin;
+        maxX = pEnd;
         minY = Params.MIN_Y;
         maxY = Params.MAX_Y;
-
 
         bifurcationPoints = calculateBifurcationPoints();
 
         findMinMaxY(bifurcationPoints);
-        drawAxes(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
 
-        drawPoints(gc, bifurcationPoints, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
+        for (int i = 0; i < Math.min(N, canvases.size()); i++) {
+            Canvas currentCanvas = canvases.get(i);
+            GraphicsContext gc = currentCanvas.getGraphicsContext2D();
+            gc.clearRect(0, 0, currentCanvas.getWidth(), currentCanvas.getHeight());
+            drawAxes(gc, canvasWidth, canvasHeight, minX, maxX, minY, maxY);
+            drawPoints(gc, bifurcationPoints.get(i), canvasWidth, canvasHeight, minX, maxX, minY, maxY);
+        }
     }
-
 
     private void drawPoints(GraphicsContext gc, List<Point2D> bifurcationPoints, double width, double height,
                             double minX, double maxX, double minY, double maxY) {
@@ -75,21 +81,48 @@ public class BifurcationController {
         }
     }
 
-    private List<Point2D> calculateBifurcationPoints() {
-        List<Point2D> bifurcationPoints = new ArrayList<>();
+    private List<List<Point2D>> calculateBifurcationPoints() {
+        List<List<Point2D>> bifurcationPoints = new ArrayList<>();
+        for (int i = 0; i < N; i++) {
+            bifurcationPoints.add(new ArrayList<>());
+        }
+
         for (double p = pBegin; p <= pEnd; p += pStep) {
             System.out.println("p=" + p);
-            bifurcationPoints.addAll(
-                    rungeKuttaSolver.plotGraph(
-                            FunctionProvider.DEFAULT_F,
-                            FunctionProvider.DEFAULT_G,
-                            Params.X_BEGIN, Params.Y_BEGIN, Params.Z_BEGIN,
-                            Params.X_END, Params.STEP, Params.BIFURCATION_P_TOLERANCE,
-                            Params.BIFURCATION_P_MIN_STEP, Params.MAX_STEP,
-                            N, p, R)
+            List<List<Point2D>> newPoints = rungeKuttaSolver.plotGraph(
+                    FunctionProvider.DEFAULT_F,
+                    FunctionProvider.DEFAULT_G,
+                    Params.X_BEGIN, Params.Y_BEGIN, Params.Z_BEGIN,
+                    Params.X_END, Params.STEP, Params.BIFURCATION_P_TOLERANCE,
+                    Params.BIFURCATION_P_MIN_STEP, Params.MAX_STEP,
+                    N, p, R
             );
+
+            for (int i = 0; i < N; i++) {
+                bifurcationPoints.get(i).addAll(newPoints.get(i));
+            }
         }
+
         return bifurcationPoints;
+    }
+
+    private void findMinMaxY(List<List<Point2D>> points) {
+        double minY = Double.MAX_VALUE;
+        double maxY = Double.MIN_VALUE;
+
+        for (List<Point2D> sublist : points) {
+            for (Point2D point : sublist) {
+                if (point.getY() < minY) {
+                    minY = point.getY();
+                }
+                if (point.getY() > maxY) {
+                    maxY = point.getY();
+                }
+            }
+        }
+
+        this.minY = minY;
+        this.maxY = maxY + maxY / 4;
     }
 
     private void drawCoordinateLines(GraphicsContext gc, double width, double height) {
@@ -107,23 +140,6 @@ public class BifurcationController {
             double y = 50 + i * stepY;
             gc.strokeLine(50, y, width - 50, y);
         }
-    }
-
-    private void findMinMaxY(List<Point2D> points) {
-        double minY = Double.MAX_VALUE;
-        double maxY = Double.MIN_VALUE;
-
-        for (Point2D point : points) {
-            if (point.getY() < minY) {
-                minY = point.getY();
-            }
-            if (point.getY() > maxY) {
-                maxY = point.getY();
-            }
-        }
-
-        this.minY = minY;
-        this.maxY = maxY + maxY / 4;
     }
 
     private void drawAxes(GraphicsContext gc, double width, double height, double minX, double maxX, double minY, double maxY) {

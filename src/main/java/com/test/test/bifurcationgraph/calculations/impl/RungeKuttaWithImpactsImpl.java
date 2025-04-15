@@ -1,7 +1,10 @@
 package com.test.test.bifurcationgraph.calculations.impl;
 
 import com.test.test.config.Params;
-import com.test.test.surfacegraph.calculations.*;
+import com.test.test.surfacegraph.calculations.FuncDerivativeSurface;
+import com.test.test.surfacegraph.calculations.FuncF;
+import com.test.test.surfacegraph.calculations.FuncG;
+import com.test.test.surfacegraph.calculations.FuncSurface;
 import com.test.test.surfacegraph.calculations.impl.FunctionProvider;
 import javafx.geometry.Point2D;
 
@@ -10,9 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RungeKuttaWithImpactsImpl implements RungeKuttaSolver {
+public class RungeKuttaWithImpactsImpl implements RungeKuttaWithImpacts {
     @Override
-    public List<Point2D> plotGraph(FuncF f, FuncG g, double xBegin, double yBegin, double zBegin, double xEnd, double step, double tolerance, double minStep, double maxStep, int N, double P, double R) {
+    public List<List<Point2D>> plotGraph(FuncF f, FuncG g,
+                                         double xBegin, double yBegin, double zBegin,
+                                         double xEnd, double step,
+                                         double tolerance, double minStep, double maxStep,
+                                         int N, double P, double R) {
 
         Map<FuncSurface, FuncDerivativeSurface> surfacesMap = new HashMap<>();
         surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_1,
@@ -22,13 +29,17 @@ public class RungeKuttaWithImpactsImpl implements RungeKuttaSolver {
         if (N == 3) surfacesMap.put(FunctionProvider.DEFAULT_SURFACE_FUNCTION_3,
                 FunctionProvider.DEFAULT_DERIVATIVE_SURFACE_3);
 
-        List<Point2D> postImpactSpeeds = new ArrayList<>();
+        List<List<Point2D>> postImpactSpeedsPerSurface = new ArrayList<>();
+        for (int i = 0; i < N; i++) {
+            postImpactSpeedsPerSurface.add(new ArrayList<>());
+        }
+
         int impactsCount = 0;
         double currentStep = step;
         double nextY, nextZ;
 
         while (impactsCount < Params.SKIP_IMPACTS_NUM + Params.IMPACTS_NUM) {
-            boolean impactOccurred = false;
+            int impactIndex = -1;
             while (true) {
                 double k1_y = currentStep * f.compute(zBegin);
                 double k1_z = currentStep * g.compute(P);
@@ -58,6 +69,7 @@ public class RungeKuttaWithImpactsImpl implements RungeKuttaSolver {
                 }
             }
 
+            int tmpIndex = 0;
             for (Map.Entry<FuncSurface, FuncDerivativeSurface> entry : surfacesMap.entrySet()) {
                 double surfaceValue = entry.getKey().compute(xBegin);
                 double df_dtau = entry.getValue().compute(xBegin);
@@ -69,28 +81,39 @@ public class RungeKuttaWithImpactsImpl implements RungeKuttaSolver {
                     nextY = surfaceValue;
                     nextZ = -R * zImpact + (1 + R) * df_dtau;
 
-                    impactOccurred = true;
+                    impactIndex = tmpIndex;
                 }
+                tmpIndex++;
             }
 
             xBegin += currentStep;
             yBegin = nextY;
             zBegin = nextZ;
 
-            if (impactOccurred) {
-                postImpactSpeeds.add(new Point2D(P, nextZ));
+            if (impactIndex == 0) {
+                postImpactSpeedsPerSurface.get(0).add(new Point2D(P, nextZ));
+                if (postImpactSpeedsPerSurface.get(0).size() > 200) {
+                    postImpactSpeedsPerSurface.get(0).removeFirst();
+                }
+                impactsCount++;
+            } else if (impactIndex == 1) {
+                postImpactSpeedsPerSurface.get(1).add(new Point2D(P, nextZ));
+                if (postImpactSpeedsPerSurface.get(1).size() > 200) {
+                    postImpactSpeedsPerSurface.get(1).removeFirst();
+                }
+                impactsCount++;
+            } else if (impactIndex == 2) {
+                postImpactSpeedsPerSurface.get(2).add(new Point2D(P, nextZ));
+                if (postImpactSpeedsPerSurface.get(2).size() > 200) {
+                    postImpactSpeedsPerSurface.get(2).removeFirst();
+                }
                 impactsCount++;
             }
-
-            if (postImpactSpeeds.size() > 200) {
-                postImpactSpeeds.removeFirst();
-            }
-
             if (currentStep < maxStep) {
                 currentStep *= 2.0;
             }
         }
 
-        return postImpactSpeeds;
+        return postImpactSpeedsPerSurface;
     }
 }

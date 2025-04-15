@@ -5,7 +5,7 @@ public class Params {
     public static final int N = 2;
 
     public static final double P = 1.5;
-    public static final double R = 0.4;
+    public static final double R = 0.8;
     public static final double M = 0.1;
 
     public static final double Y1 = 4;
